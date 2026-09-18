@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/TINY_VLM%20logo.png" alt="Tiny VLM" width="360">
+  <img src="assets/tiny_vlm_logo_rounded.png" alt="Tiny VLM" width="200">
 </p>
 
 # RLS Entrance Challenge — Tiny Vision-Language Model
