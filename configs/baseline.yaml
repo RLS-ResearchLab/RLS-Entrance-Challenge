@@ -1,0 +1,2 @@
+# Main model configuration (architecture + training hyperparameters).
+# Referenced from the results table in README.md as configs/baseline.yaml.

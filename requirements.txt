@@ -1,0 +1,10 @@
+# Pin the exact versions you used (see `pip freeze`). These are tested
+# baselines for generate_data.py and a typical PyTorch training stack --
+# adjust to match your own environment (e.g. Colab's CUDA build of torch).
+numpy==1.26.4
+Pillow==10.4.0
+tqdm==4.66.5
+torch==2.4.1
+pyyaml==6.0.2
+matplotlib==3.9.2
+pytest==8.3.3

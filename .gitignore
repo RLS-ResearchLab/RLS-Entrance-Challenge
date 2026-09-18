@@ -1,0 +1,26 @@
+# Challenge source materials (kept locally, not published in this repo)
+project/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Generated dataset & training artifacts
+data/
+checkpoints/
+*.pt
+*.ckpt
+wandb/
+.ipynb_checkpoints/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+project
