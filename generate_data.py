@@ -23,10 +23,13 @@ except ImportError:  # pragma: no cover - tqdm is a soft dependency
         return iterable
 
 IMAGE_SIZE = 64
-MARGIN = 3
+MARGIN = 3  # minimum distance from an object's edge to the image border
+MIN_GAP = 4  # minimum distance between the edges of two objects
 
 SIZE_NAMES = ["small", "large"]
-SIZES = {"small": 8, "large": 15}  # half-extent in pixels
+# Half-extent in pixels. Two large objects must fit side by side with a gap:
+# 2 * (12 + 12) + MIN_GAP <= IMAGE_SIZE - 2 * MARGIN.
+SIZES = {"small": 7, "large": 12}
 
 COLOR_NAMES = ["red", "green", "blue", "yellow"]
 COLORS = {
@@ -71,24 +74,35 @@ def sample_single_position(rng, half_extent):
     return rng.uniform(lo, hi), rng.uniform(lo, hi)
 
 
+def sample_axis_pair(rng, half_first, half_second):
+    # Centers of two objects along one axis, the first one before the second,
+    # with at least MIN_GAP between their edges and both inside the margins.
+    lo = half_first + MARGIN
+    hi = IMAGE_SIZE - half_second - MARGIN
+    first = rng.uniform(lo, hi - half_first - half_second - MIN_GAP)
+    second = rng.uniform(first + half_first + half_second + MIN_GAP, hi)
+    return first, second
+
+
 def sample_pair_positions(rng, relation, half1, half2):
-    # Objects are placed in two non-overlapping zones (near the top-left
-    # half and the bottom-right half of the axis the relation applies to)
-    # so the relation holds by construction, with jitter inside each zone.
-    if relation in ("leftof", "rightof"):
-        near = rng.uniform(half1 + MARGIN, IMAGE_SIZE // 2 - 6)
-        far = rng.uniform(IMAGE_SIZE // 2 + 6, IMAGE_SIZE - half2 - MARGIN)
-        y1 = rng.uniform(half1 + MARGIN, IMAGE_SIZE - half1 - MARGIN)
-        y2 = rng.uniform(half2 + MARGIN, IMAGE_SIZE - half2 - MARGIN)
-        x1, x2 = (near, far) if relation == "leftof" else (far, near)
-        return (x1, y1), (x2, y2)
-    else:  # above / below
-        near = rng.uniform(half1 + MARGIN, IMAGE_SIZE // 2 - 6)
-        far = rng.uniform(IMAGE_SIZE // 2 + 6, IMAGE_SIZE - half2 - MARGIN)
-        x1 = rng.uniform(half1 + MARGIN, IMAGE_SIZE - half1 - MARGIN)
-        x2 = rng.uniform(half2 + MARGIN, IMAGE_SIZE - half2 - MARGIN)
-        y1, y2 = (near, far) if relation == "above" else (far, near)
-        return (x1, y1), (x2, y2)
+    # The relation holds by construction: the objects are separated along the
+    # relation's axis, so they never overlap. Along the other axis each object
+    # is placed independently.
+    y1 = rng.uniform(half1 + MARGIN, IMAGE_SIZE - half1 - MARGIN)
+    y2 = rng.uniform(half2 + MARGIN, IMAGE_SIZE - half2 - MARGIN)
+    x1 = rng.uniform(half1 + MARGIN, IMAGE_SIZE - half1 - MARGIN)
+    x2 = rng.uniform(half2 + MARGIN, IMAGE_SIZE - half2 - MARGIN)
+    if relation == "leftof":
+        x1, x2 = sample_axis_pair(rng, half1, half2)
+    elif relation == "rightof":
+        x2, x1 = sample_axis_pair(rng, half2, half1)
+    elif relation == "above":
+        y1, y2 = sample_axis_pair(rng, half1, half2)
+    elif relation == "below":
+        y2, y1 = sample_axis_pair(rng, half2, half1)
+    else:
+        raise ValueError(f"unknown relation {relation!r}")
+    return (x1, y1), (x2, y2)
 
 
 def draw_shape(draw, obj):

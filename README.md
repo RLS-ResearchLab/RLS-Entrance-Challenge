@@ -37,6 +37,7 @@ given. If anything here conflicts with those documents, the documents win.
 ```bash
 pip install -r requirements.txt
 python generate_data.py            # writes data/{train,val,test,test_heldout}.pt + data/meta.json
+pytest                             # generator tests pass out of the box; model tests skip until src/model/ is implemented
 ```
 
 ## Repository layout
@@ -57,12 +58,20 @@ python generate_data.py            # writes data/{train,val,test,test_heldout}.p
 │   ├── evaluate.py
 │   └── generate.py
 ├── tests/
-│   ├── test_attention.py
-│   └── test_shapes.py
+│   ├── test_attention.py       # provided: equivalence with F.scaled_dot_product_attention, masks, gradients
+│   ├── test_shapes.py          # provided: tensor shapes and pipeline sanity checks
+│   └── test_generate_data.py   # provided: checks generate_data.py against the spec
 ├── experiments/E1_blind/
 ├── benchmarks/S1_throughput/
 └── report/
 ```
+
+## Provided tests
+
+The model tests skip until you implement `src/model/`. They only assume a few conventions, documented at the top
+of `tests/test_attention.py` and `tests/test_shapes.py`: the last `nn.Module` in each `src/model/` file is its
+main class; attention is `Cls(d_model, n_heads)` called as `attention(x, mask)`, with a boolean mask where `True`
+means "may attend"; the encoder and the full model can be built with no arguments.
 
 ## Results
 
